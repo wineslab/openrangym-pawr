@@ -11,11 +11,10 @@ lxc init local:${DU_LXC_BASE_IMG} ${DU_LXC_BASE_IMG}
 lxc start ${DU_LXC_BASE_IMG}
 
 echo "Launching new container"
-lxc launch ubuntu:18.04 ${DU_LXC_IMG}
-lxc stop ${DU_LXC_IMG}
+lxc init ubuntu:18.04 ${DU_LXC_IMG}
 
 echo "Configuring USB passthrough to LXC container"
-lxc config set ${DU_LXC_IMG} "raw.lxc lxc.cgroup.devices.allow = c 189:* rwm"
+lxc config set ${DU_LXC_IMG} raw.lxc "lxc.cgroup.devices.allow = c 189:* rwm"
 lxc config device add ${DU_LXC_IMG} b210usb usb mode="0777"
 
 echo "Configuring container security"
@@ -95,6 +94,10 @@ lxc exec ${DU_LXC_IMG} -- bash -c "cd /root/radio_code/srsLTE \
   && make install \
   && ldconfig"
 
-# TODO: set SCOPE parameters
+echo "Setting SCOPE parameters"
+lxc exec ${DU_LXC_IMG} -- bash -c "sed -i 's/^#*dl_freq\s*=\s*[[:alnum:]]*\s*$/dl_freq = 2435000000/g' /root/radio_code/srslte_config/enb.conf \
+  && sed -i 's/^#*ul_freq\s*=\s*[[:alnum:]]*\s*$/ul_freq = 2415000000/g' /root/radio_code/srslte_config/enb.conf \
+  && sed -i 's/^time_adv_nsamples\s*=\s*[[:alnum:]]*\s*$/time_adv_nsamples = auto/g' /root/radio_code/srslte_config/enb.conf \
+  && sed -i 's/^#*colosseum_testbed\s*::\s*[[:alnum:]]*\s*$/colosseum_testbed::0/g' /root/radio_code/scope_config/scope_cfg.txt"
 
 # TODO: compile DU

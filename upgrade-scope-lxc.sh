@@ -59,6 +59,7 @@ lxc exec ${DU_LXC_IMG} -- bash -c "apt-get update && apt install -y \
   libzmq3-dev \
   libpcsclite-dev \
   openssh-server \
+  libpcap0.8-dev \
   && apt-get clean && rm -rf /var/cache/apt/archives"
 
 echo "Cloning and building UHD 3.15"
@@ -101,3 +102,9 @@ lxc exec ${DU_LXC_IMG} -- bash -c "sed -i 's/^#*dl_freq\s*=\s*[[:alnum:]]*\s*$/d
   && sed -i 's/^#*colosseum_testbed\s*::\s*[[:alnum:]]*\s*$/colosseum_testbed::0/g' /root/radio_code/scope_config/scope_cfg.txt"
 
 # TODO: compile DU
+echo "Building DU"
+LXC_INTERNET_IF=`lxc list ${DU_LXC_IMG} -c 4 --format=csv | awk -F '[()]' '{print $2}'`
+lxc exec ${DU_LXC_IMG} -- bash -c "cd /root/radio_code/du-l2 \
+  && sed -i 's/^export INTERFACE_TO_RIC\s*=.*$/export INTERFACE_TO_RIC=\"'${LXC_INTERNET_IF}'\"/g' /root/radio_code/du-l2/build_odu.sh \
+  && sed -i 's/^export DEBUG\s*=.*$/export DEBUG=0/g' /root/radio_code/du-l2/build_odu.sh \
+  && ./build_odu.sh clean"

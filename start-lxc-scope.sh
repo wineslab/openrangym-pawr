@@ -6,6 +6,7 @@ set -xeuo pipefail
 
 DU_LXC_BASE_IMG=du-scope
 DU_LXC_IMG_UPGR=du-scope-1804
+X310_NET=192.168.40.0
 
 # build image if it does not exists
 if [[ `lxc image show ${DU_LXC_IMG_UPGR} 2> /dev/null; echo $?` = "1" ]]; then
@@ -21,7 +22,8 @@ if [[ $1 == "b210" ]]; then
 
 elif [[ $1 == "x310" ]]; then
   echo "Adding Ethernet interface to X310"
-  lxc config device add du-scope-1804 usrp1 nic name="usrp1" nictype="physical" parent="enp134s0f0"
+  X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
+  lxc config device add ${DU_LXC_IMG_UPGR} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
 fi
 
 echo "Configuring container security"

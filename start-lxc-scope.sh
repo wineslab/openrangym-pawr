@@ -3,7 +3,6 @@
 #  Call it as start-lxc-scope.sh usrp_type [flase]
 #    usrp_type: b210 or x310
 #    flash: flash USRP X310 if passed
-
 set -xeuo pipefail
 
 DU_LXC_BASE_IMG=du-scope
@@ -23,7 +22,7 @@ if [[ `lxc image show ${DU_LXC_IMG_UPGR} 2> /dev/null; echo $?` = "1" ]]; then
   . ./upgrade-scope-lxc.sh
 fi
 
-echo "Initializing LXC image"
+echo "Initializing LXC container"
 lxc init ${DU_LXC_IMG_UPGR} ${DU_LXC_IMG_UPGR}
 
 # set up containers to interface with USRP
@@ -43,7 +42,7 @@ fi
 echo "Configuring container security"
 lxc config set ${DU_LXC_IMG_UPGR} security.privileged "yes"
 
-echo "Starting container"
+echo "Starting LXC container"
 lxc start ${DU_LXC_IMG_UPGR}
 
 if [[ $1 == "x310" ]]; then

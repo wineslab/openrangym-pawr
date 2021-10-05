@@ -6,6 +6,13 @@ set -xeuo pipefail
 RIC_LXC_IMG=ric
 RIC_PORT=36422
 
+echo "Flushing NAT table"
+iptables -t nat -F
+
+echo "Restarting LXD/LXC"
+service lxd restart
+service lxc restart
+
 echo "Initializing LXC container"
 lxc init ${RIC_LXC_IMG} ${RIC_LXC_IMG}
 

@@ -1,6 +1,8 @@
 #!/bin/bash
 # This starts the SCOPE LXC container on POWDER
-#  Call it as start-lxc-scope.sh usrp_type, where usrp_type is either b210 or x310
+#  Call it as start-lxc-scope.sh usrp_type [flase]
+#    usrp_type: b210 or x310
+#    flash: flash USRP X310 if passed
 
 set -xeuo pipefail
 
@@ -9,8 +11,8 @@ DU_LXC_IMG_UPGR=du-scope-1804
 X310_NET=192.168.40.0
 
 # check number of passed arguments
-if [[ "$#" -ne 1 ]]; then
-    echo "Illegal number of parameters. Call as start-lxc-scope.sh usrp_type"
+if [[ $# -lt 1 ]]; then
+    echo "Illegal number of parameters. Call as start-lxc-scope.sh usrp_type [flash]"
     exit 1
 fi
 
@@ -21,7 +23,10 @@ if [[ `lxc image show ${DU_LXC_IMG_UPGR} 2> /dev/null; echo $?` = "1" ]]; then
   . ./upgrade-scope-lxc.sh
 fi
 
-# set up containers to interface with USRPs
+echo "Initializing LXC image"
+lxc init ${DU_LXC_IMG_UPGR} ${DU_LXC_IMG_UPGR}
+
+# set up containers to interface with USRP
 if [[ $1 == "b210" ]]; then
   echo "Configuring USB passthrough to LXC container"
   lxc config set ${DU_LXC_IMG_UPGR} raw.lxc "lxc.cgroup.devices.allow = c 189:* rwm"
@@ -48,9 +53,11 @@ if [[ $1 == "x310" ]]; then
   echo "Downloading UHD images"
   lxc exec ${DU_LXC_IMG_UPGR} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"
 
-  echo "Flashing USRP device"
-  lxc exec ${DU_LXC_IMG_UPGR} -- bash -c "/usr/local/bin/uhd_image_loader --args=\"type=x300,addr=192.168.40.2,fpga=XG\""
+  if [[ $2 == "flash" ]]; then
+    echo "Flashing USRP device"
+    lxc exec ${DU_LXC_IMG_UPGR} -- bash -c "/usr/local/bin/uhd_image_loader --args=\"type=x300,addr=192.168.40.2,fpga=XG\""
+  fi
 
   echo "Setting memory on host computer"
-  sudo sysctl -w net.core.wmem_max=24862979
+  sysctl -w net.core.wmem_max=24862979
 fi

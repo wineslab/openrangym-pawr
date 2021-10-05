@@ -8,6 +8,13 @@ DU_LXC_BASE_IMG=du-scope
 DU_LXC_IMG_UPGR=du-scope-1804
 X310_NET=192.168.40.0
 
+# check number of passed arguments
+if [[ "$#" -ne 1 ]]; then
+    echo "Illegal number of parameters. Call as start-lxc-scope.sh usrp_type"
+    exit 1
+fi
+
+
 # build image if it does not exists
 if [[ `lxc image show ${DU_LXC_IMG_UPGR} 2> /dev/null; echo $?` = "1" ]]; then
   echo "Updating image"
@@ -19,11 +26,13 @@ if [[ $1 == "b210" ]]; then
   echo "Configuring USB passthrough to LXC container"
   lxc config set ${DU_LXC_IMG_UPGR} raw.lxc "lxc.cgroup.devices.allow = c 189:* rwm"
   lxc config device add ${DU_LXC_IMG_UPGR} b210usb usb mode="0777"
-
 elif [[ $1 == "x310" ]]; then
   echo "Adding Ethernet interface to X310"
   X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
   lxc config device add ${DU_LXC_IMG_UPGR} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
+else
+  echo "Unknown passed parameter."
+  exit 1
 fi
 
 echo "Configuring container security"

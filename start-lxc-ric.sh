@@ -16,6 +16,9 @@ lxc config set ${RIC_LXC_IMG} security.nesting "yes"
 echo "Starting LXC container"
 lxc start ${RIC_LXC_IMG}
 
+echo "Sleeping 10s"
+sleep 10
+
 echo "Setting postrouting chain"
 HOST_IF=$(route -e | grep default | awk -F ' ' '{print $8}' | xargs)
 RIC_IF=$(lxc list ${RIC_LXC_IMG} -c 6 --format=csv | awk -F '[()]' '{print $2}' | xargs)

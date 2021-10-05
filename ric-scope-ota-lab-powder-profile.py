@@ -15,19 +15,10 @@ import geni.rspec.emulab.spectrum as spectrum
 import geni.rspec.emulab as emulab
 
 
-BIN_PATH = "/local/repository/bin"
-ETC_PATH = "/local/repository/etc"
-DEFAULT_SRSRAN_HASH = "release_21_04"
-SRSLTE_IMG = "urn:publicid:IDN+emulab.net+image+PowderTeam:U18LL-SRSLTE"
 MNGR_ID = "urn:publicid:IDN+emulab.net+authority+cm"
-SRS_DEPLOY_SCRIPT = os.path.join(BIN_PATH, "deploy-srs.sh")
 
 RIC_IMG = "urn:publicid:IDN+emulab.net+image+wicos:ric-colosseum"
-RIC_DATASET_IMG = "urn:publicid:IDN+emulab.net:wicos+ltdataset+lxc-storage-pool"
-
 DU_IMG = "urn:publicid:IDN+emulab.net+image+wicos:du-scope"
-DU_DATASET_IMG = "urn:publicid:IDN+emulab.net:wicos+imdataset+du-scope-lxc"
-
 DU_LXC_IMAGE_NAME = "du-scope"
 
 class GLOBALS(object):
@@ -42,19 +33,13 @@ def x310_node_pair(idx, x310_radio):
     node.disk_image = DU_IMG
     node.component_manager_id = MNGR_ID
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    # node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-sdr-iface.sh"))
     
     # allocate temporary disk space to initialize LXC container on
     bs = node.Blockstore("bs_x310_" + str(idx), "/mydata")
     bs.size = "30GB"
-    # bs = node.Blockstore("bs", "/mydata")
-    # bs.dataset = DU_DATASET_IMG'
     
     # create LXC storage pool directory
     node.addService(rspec.Execute(shell="bash", command="sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default"))
-
-    # cmd = "{} {}".format(SRS_DEPLOY_SCRIPT, DEFAULT_SRSRAN_HASH)
-    # node.addService(rspec.Execute(shell="bash", command=SRS_DEPLOY_SCRIPT))
 
     node_radio_if = node.addInterface("usrp_if")
     node_radio_if.addAddress(rspec.IPv4Address("192.168.40.1",
@@ -88,11 +73,8 @@ def b210_nuc_pair(idx, b210_node):
     node.component_id = b210_node.component_id
     node.disk_image = DU_IMG
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-    # cmd = "{} {}".format(SRS_DEPLOY_SCRIPT, DEFAULT_SRSRAN_HASH)
-    # node.addService(rspec.Execute(shell="bash", command=SRS_DEPLOY_SCRIPT))
     
     # allocate temporary disk space to initialize LXC container on
-    # initialize_lxc_container(10 * idx, node, DU_LXC_IMAGE_NAME)
     bs = node.Blockstore("bs_b210_" + str(idx), "/mydata")
     bs.size = "30GB"
     
@@ -100,31 +82,11 @@ def b210_nuc_pair(idx, b210_node):
     node.addService(rspec.Execute(shell="bash", command="sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default"))
 
 
-# def initialize_lxc_container(node_idx, node, lxc_image_name):
-#     create_pool_dir = "sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default/containers"
-#     create_container = "sudo lxc init local:" + lxc_image_name + " " + lxc_image_name
-#     start_container = "sudo lxc start " + lxc_image_name
-    
-#     # initialize temprary blockstore
-#     node.Blockstore("bs" + str(node_idx), "/mydata").size = "30GB"
-
-#     # run commands on node
-#     node.addService(rspec.Execute(shell="bash", command=create_pool_dir))
-#     node.addService(rspec.Execute(shell="bash", command=create_container))
-#     node.addService(rspec.Execute(shell="bash", command=start_container))
-
-
 def allocate_compute_node(idx, compute_node):
     node = request.RawPC("{}-compute-only".format(idx))
     node.hardware_type = compute_node.component_id
     node.disk_image = RIC_IMG
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
-
-    # # connect dataset
-    # iface = node.addInterface()
-    # fslink = request.Link("fslink")
-    # fslink.addInterface(iface)
-    # fslink.addInterface(dataset_fs.interface)
     
     # allocate temporary disk space to initialize LXC container on
     bs = node.Blockstore("bs_ric_" +str(idx), "/mydata")
@@ -271,12 +233,6 @@ for i, x310_radio in enumerate(params.x310_radios):
 
 for i, b210_node in enumerate(params.b210_nodes):
     b210_nuc_pair(i, b210_node)
-
-# # instantiate remote dataset RIC
-# if len(params.compute_nodes) > 0:
-#     fsnode = request.RemoteBlockstore("fsnode", "/mydata")
-#     fsnode.dataset = RIC_DATASET_IMG
-#     fsnode.rwclone = True
 
 for i, compute_node in enumerate(params.compute_nodes):
     allocate_compute_node(i, compute_node)

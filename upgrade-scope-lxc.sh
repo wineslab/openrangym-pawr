@@ -97,9 +97,8 @@ lxc exec ${DU_LXC_IMG_UPGR} -- bash -c "sed -i 's/^#*dl_freq\s*=\s*[[:alnum:]]*\
   && sed -i 's/^time_adv_nsamples\s*=\s*[[:alnum:]]*\s*$/time_adv_nsamples = auto/g' /root/radio_code/srslte_config/enb.conf \
   && sed -i 's/^#*colosseum_testbed\s*::\s*[[:alnum:]]*\s*$/colosseum_testbed::0/g' /root/radio_code/scope_config/scope_cfg.txt"
 
-# TODO: compile DU
 echo "Building DU"
-LXC_INTERNET_IF=`lxc list ${DU_LXC_IMG_UPGR} -c 4 --format=csv | awk -F '[()]' '{print $2}'`
+LXC_INTERNET_IF=$(lxc list ${DU_LXC_IMG_UPGR} -c 6 --format=csv | awk -F '[()]' '{print $2}' | xargs)
 lxc exec ${DU_LXC_IMG_UPGR} -- bash -c "cd /root/radio_code/du-l2 \
   && sed -i 's/^export INTERFACE_TO_RIC\s*=.*$/export INTERFACE_TO_RIC=\"'${LXC_INTERNET_IF}'\"/g' /root/radio_code/du-l2/build_odu.sh \
   && sed -i 's/^export DEBUG\s*=.*$/export DEBUG=0/g' /root/radio_code/du-l2/build_odu.sh \

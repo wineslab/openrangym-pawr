@@ -82,15 +82,29 @@ def b210_nuc_pair(idx, b210_node):
     node.addService(rspec.Execute(shell="bash", command="sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default"))
 
 
-def allocate_compute_node(idx, compute_node):
-    node = request.RawPC("{}-compute-only".format(idx))
-    node.hardware_type = compute_node.component_id
+def allocate_ric_node(idx, ric_node):
+    node = request.RawPC("{}-ric".format(idx))
+    node.hardware_type = ric_node.component_id
     node.disk_image = RIC_IMG
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
     
     # allocate temporary disk space to initialize LXC container on
     bs = node.Blockstore("bs_ric_" +str(idx), "/mydata")
     bs.size = "100GB"
+    
+    # create LXC storage pool directory
+    node.addService(rspec.Execute(shell="bash", command="sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default"))
+
+
+def allocate_cn_node(idx, cn_node):
+    node = request.RawPC("{}-cn".format(idx))
+    node.hardware_type = cn_node.component_id
+    node.disk_image = DU_IMG
+    node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
+    
+    # allocate temporary disk space to initialize LXC container on
+    bs = node.Blockstore("bs_cn_" +str(idx), "/mydata")
+    bs.size = "30GB"
     
     # create LXC storage pool directory
     node.addService(rspec.Execute(shell="bash", command="sudo mkdir -p /mydata/var/lib/lxd/storage-pools/default"))
@@ -171,13 +185,26 @@ pc.defineStructParameter("b210_nodes", "B210 Radios", [],
                          ],
                          )
 
-pc.defineStructParameter("compute_nodes", "Compute Nodes", [],
+pc.defineStructParameter("ric_nodes", "RIC Nodes", [],
                          multiValue=True,
                          min=0, max=None,
                          members=[
                              portal.Parameter(
                                  "component_id",
-                                 "Compute Node",
+                                 "RIC Node",
+                                 portal.ParameterType.STRING,
+                                 node_type[0],
+                                 node_type)
+                         ],
+                         )
+
+pc.defineStructParameter("cn_nodes", "Core Network Nodes", [],
+                         multiValue=True,
+                         min=0, max=None,
+                         members=[
+                             portal.Parameter(
+                                 "component_id",
+                                 "Core Network Node",
                                  portal.ParameterType.STRING,
                                  node_type[0],
                                  node_type)
@@ -234,7 +261,10 @@ for i, x310_radio in enumerate(params.x310_radios):
 for i, b210_node in enumerate(params.b210_nodes):
     b210_nuc_pair(i, b210_node)
 
-for i, compute_node in enumerate(params.compute_nodes):
-    allocate_compute_node(i, compute_node)
+for i, ric_node in enumerate(params.ric_nodes):
+    allocate_ric_node(i, ric_node)
+
+for i, cn_node in enumerate(params.cn_nodes):
+    allocate_cn_node(i, cn_node)
 
 pc.printRequestRSpec()

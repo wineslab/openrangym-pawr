@@ -18,6 +18,7 @@ import geni.rspec.emulab as emulab
 MNGR_ID = "urn:publicid:IDN+emulab.net+authority+cm"
 
 RIC_IMG = "urn:publicid:IDN+emulab.net+image+wicos:ric-colosseum"
+CN_IMG = "urn:publicid:IDN+emulab.net+image+wicos:open5gs"
 DU_IMG = "urn:publicid:IDN+emulab.net+image+wicos:du-scope"
 DU_LXC_IMAGE_NAME = "du-scope"
 
@@ -83,7 +84,7 @@ def b210_nuc_pair(idx, b210_node):
 
 
 def allocate_ric_node(idx, ric_node):
-    node = request.RawPC("{}-ric".format(idx))
+    node = request.RawPC("ric-{}".format(idx))
     node.hardware_type = ric_node.component_id
     node.disk_image = RIC_IMG
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
@@ -97,9 +98,9 @@ def allocate_ric_node(idx, ric_node):
 
 
 def allocate_cn_node(idx, cn_node):
-    node = request.RawPC("{}-cn".format(idx))
+    node = request.RawPC("cn-{}".format(idx))
     node.hardware_type = cn_node.component_id
-    node.disk_image = DU_IMG
+    node.disk_image = CN_IMG
     node.addService(rspec.Execute(shell="bash", command="/local/repository/bin/tune-cpu.sh"))
     
     # allocate temporary disk space to initialize LXC container on

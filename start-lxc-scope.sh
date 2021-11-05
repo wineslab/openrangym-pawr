@@ -11,7 +11,7 @@ DU_LXC_BASE_IMG=du-scope
 
 # testbed images
 DU_LXC_IMG_POWDER=du-scope-1804
-DU_LXC_IMAGE_ORBIT=${DU_LXC_BASE_IMG}
+DU_LXC_IMG_ORBIT=${DU_LXC_BASE_IMG}
 
 X310_NET=192.168.40.0
 
@@ -20,9 +20,13 @@ if [[ $# -lt 2 ]]; then
     echo "Illegal number of parameters. Call as start-lxc-scope.sh usrp_type [flash]"
     exit 1
 else
+  # get args into variables
   TESTBED=$1
   USRP=$2
-  FLASH=$3
+
+  if [[ $# -gt 3 ]]; then
+    FLASH=$3
+  fi
 fi
 
 # check testbed

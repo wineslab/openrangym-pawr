@@ -13,7 +13,9 @@ DU_LXC_BASE_IMG=du-scope
 DU_LXC_IMG_POWDER=du-scope-1804
 DU_LXC_IMG_ORBIT=${DU_LXC_BASE_IMG}
 
-X310_NET=192.168.40.0
+# testbed subnetwork for USRP X310
+X310_NET_POWDER=192.168.40.0
+X310_NET_ORBIT=10.10.0.0
 
 # check number of passed arguments
 if [[ $# -lt 2 ]]; then
@@ -32,8 +34,10 @@ fi
 # check testbed
 if [[ ${TESTBED} == "powder" ]]; then
   DU_LXC_IMG=${DU_LXC_IMG_POWDER}
+  X310_NET=${X310_NET_POWDER}
 elif [[ ${TESTBED}=="orbit" ]]; then
   DU_LXC_IMG=${DU_LXC_IMG_ORBIT}
+  X310_NET=${X310_NET_ORBIT}
 else
   echo "Unknown passed testbed."
   exit 1
@@ -72,7 +76,8 @@ lxc start ${DU_LXC_IMG}
 
 if [[ ${USRP} == "x310" ]]; then
   echo "Configuring Ethernet interface to X310"
-  lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
+  # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
+  lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".1/24 mtu 9000"
 
   echo "Downloading UHD images"
   lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"

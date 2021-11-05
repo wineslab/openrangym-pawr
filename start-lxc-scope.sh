@@ -74,10 +74,10 @@ lxc config set ${DU_LXC_IMG} security.privileged "yes"
 echo "Starting LXC container"
 lxc start ${DU_LXC_IMG}
 
-if [[ ${USRP} == "x310" ]]; then
+if [[ ${USRP} == "x310" && ${TESTBED} == "powder" ]]; then
   echo "Configuring Ethernet interface to X310"
-  # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
-  lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".3/24 mtu 9000"
+  lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
+  # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".1/24 mtu 9000"
 
   echo "Downloading UHD images"
   lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"

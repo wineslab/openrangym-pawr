@@ -60,9 +60,11 @@ if [[ ${USRP} == "b210" ]]; then
   lxc config set ${DU_LXC_IMG} raw.lxc "lxc.cgroup.devices.allow = c 189:* rwm"
   lxc config device add ${DU_LXC_IMG} b210usb usb mode="0777"
 elif [[ ${USRP} == "x310" ]]; then
-  echo "Adding Ethernet interface to X310"
-  X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
-  lxc config device add ${DU_LXC_IMG} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
+  if [[ ${TESTBED} == "powder" ]]; then
+    echo "Adding Ethernet interface to X310"
+    X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
+    lxc config device add ${DU_LXC_IMG} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
+  fi
 else
   echo "Unknown passed parameter."
   exit 1

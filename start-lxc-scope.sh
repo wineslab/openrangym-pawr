@@ -15,7 +15,6 @@ DU_LXC_IMG_ORBIT=${DU_LXC_BASE_IMG}
 
 # testbed subnetwork for USRP X310
 X310_NET_POWDER=192.168.40.0
-X310_NET_ORBIT=10.10.0.0
 
 # check number of passed arguments
 if [[ $# -lt 2 ]]; then
@@ -37,7 +36,6 @@ if [[ ${TESTBED} == "powder" ]]; then
   X310_NET=${X310_NET_POWDER}
 elif [[ ${TESTBED}=="orbit" ]]; then
   DU_LXC_IMG=${DU_LXC_IMG_ORBIT}
-  X310_NET=${X310_NET_ORBIT}
 else
   echo "Unknown passed testbed."
   exit 1

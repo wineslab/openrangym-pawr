@@ -89,7 +89,7 @@ if [[ ${USRP} == "x310" ]]; then
     ifconfig lxdbr0 mtu 9000
 
     LXD_IF=$(lxc list ${DU_LXC_IMG} -c 6 --format=csv | awk -F '[()]' '{print $2}' | xargs)
-    ifconfig ${LXD_IF} mtu 9000
+    lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig "${LXD_IF}" mtu 9000"
   else
     echo "Unknown passed testbed."
     exit 1

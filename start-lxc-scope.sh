@@ -63,9 +63,6 @@ elif [[ ${USRP} == "x310" && ${TESTBED} == "powder" ]]; then
   echo "Adding Ethernet interface to X310"
   X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
   lxc config device add ${DU_LXC_IMG} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
-else
-  echo "Unknown passed parameter."
-  exit 1
 fi
 
 echo "Configuring container security"

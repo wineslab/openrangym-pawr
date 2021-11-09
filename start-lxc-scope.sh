@@ -59,12 +59,10 @@ if [[ ${USRP} == "b210" ]]; then
   echo "Configuring USB passthrough to LXC container"
   lxc config set ${DU_LXC_IMG} raw.lxc "lxc.cgroup.devices.allow = c 189:* rwm"
   lxc config device add ${DU_LXC_IMG} b210usb usb mode="0777"
-elif [[ ${USRP} == "x310" ]]; then
-  if [[ ${TESTBED} == "powder" ]]; then
-    echo "Adding Ethernet interface to X310"
-    X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
-    lxc config device add ${DU_LXC_IMG} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
-  fi
+elif [[ ${USRP} == "x310" && ${TESTBED} == "powder" ]]; then
+  echo "Adding Ethernet interface to X310"
+  X310_IF=`route -n | grep ${X310_NET} | awk -F ' ' '{print $8}'`
+  lxc config device add ${DU_LXC_IMG} usrp1 nic name="usrp1" nictype="physical" parent="${X310_IF}"
 else
   echo "Unknown passed parameter."
   exit 1
@@ -76,17 +74,30 @@ lxc config set ${DU_LXC_IMG} security.privileged "yes"
 echo "Starting LXC container"
 lxc start ${DU_LXC_IMG}
 
-if [[ ${USRP} == "x310" && ${TESTBED} == "powder" ]]; then
-  echo "Configuring Ethernet interface to X310"
-  lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
-  # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".1/24 mtu 9000"
+if [[ ${USRP} == "x310" ]]; then
+  if [[ ${TESTBED} == "powder" ]]; then
+    echo "Configuring Ethernet interface to X310"
+    lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
+    # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".1/24 mtu 9000"
 
-  echo "Downloading UHD images"
-  lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"
+    echo "Downloading UHD images"
+    lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"
 
-  if [[ ${FLASH} == "flash" ]]; then
-    echo "Flashing USRP device"
-    lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/bin/uhd_image_loader --args=\"type=x300,addr=192.168.40.2,fpga=XG\""
+    if [[ ${FLASH} == "flash" ]]; then
+      echo "Flashing USRP device"
+      lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/bin/uhd_image_loader --args=\"type=x300,addr=192.168.40.2,fpga=XG\""
+    fi
+  elif [[ ${TESTBED}=="orbit" ]]; then
+    echo "Setting speed of Ethernet interfaces"
+    HOST_IF=$(route -e | grep default | awk -F ' ' '{print $8}' | xargs)
+    ifconfig ${HOST_IF} mtu 9000
+    ifconfig lxdbr0 mtu 9000
+
+    LXD_IF=$(lxc list ${DU_LXC_IMG} -c 6 --format=csv | awk -F '[()]' '{print $2}' | xargs)
+    ifconfig ${LXD_IF} mtu 9000
+  else
+    echo "Unknown passed testbed."
+    exit 1
   fi
 
   echo "Setting memory on host computer"

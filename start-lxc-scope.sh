@@ -25,7 +25,7 @@ else
   TESTBED=$1
   USRP=$2
 
-  if [[ $# -gt 3 ]]; then
+  if [[ $# -ge 3 ]]; then
     FLASH=$3
   fi
 fi

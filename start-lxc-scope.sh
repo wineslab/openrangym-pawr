@@ -82,8 +82,10 @@ if [[ ${USRP} == "x310" ]]; then
     lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 192.168.40.1/24 mtu 9000"
     # lxc exec ${DU_LXC_IMG} -- bash -c "ifconfig usrp1 "$(cut -d . -f1-3 <<< $X310_NET)".1/24 mtu 9000"
 
+    # allow some time for the DNS resolution to come up
+    sleep 0.5
+
     echo "Downloading UHD images"
-    sleep 1
     lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/lib/uhd/utils/uhd_images_downloader.py"
 
     if [[ ${TESTBED} == "powder" && ${FLASH} == "flash" ]]; then

@@ -10,8 +10,12 @@ echo "Flushing NAT table"
 iptables -t nat -F
 
 echo "Restarting LXD/LXC"
-service lxd restart
-service lxc restart
+if [[ $(service --status-all 2>&1 | grep lxd | wc -l) == "0" ]]; then
+  snap restart lxd
+else
+  service lxd restart
+  service lxc restart
+fi
 
 echo "Initializing LXC container"
 lxc init ${RIC_LXC_IMG} ${RIC_LXC_IMG}

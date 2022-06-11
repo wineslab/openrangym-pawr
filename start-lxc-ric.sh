@@ -21,10 +21,10 @@ iptables -t nat -F
 #fi
 
 echo "Initializing LXC container"
-lxc init ${RIC_LXC_IMG} ${RIC_LXC_IMG}
+lxc init local:${RIC_LXC_IMG} ${RIC_LXC_IMG}
 
 echo "Configuring container security"
-lxc config set ${RIC_LXC_IMG} security.privileged "yes"
+# lxc config set ${RIC_LXC_IMG} security.privileged "yes"
 lxc config set ${RIC_LXC_IMG} security.nesting "yes"
 
 echo "Starting LXC container"

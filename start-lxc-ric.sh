@@ -40,7 +40,8 @@ RIC_IP=$(lxc list ${RIC_LXC_IMG} -c 4 --format=csv | grep ${RIC_IF} | awk -F '[(
 iptables -t nat -A PREROUTING -p sctp -i ${HOST_IF} --dport ${RIC_PORT} -j DNAT --to-destination ${RIC_IP}:${RIC_PORT}
 
 echo "Starting RIC"
-lxc exec ${RIC_LXC_IMG} -- bash -c "cd "${SCRIPT_PATH}" && ./import-base-images.sh"
+# lxc exec ${RIC_LXC_IMG} -- bash -c "cd "${SCRIPT_PATH}" && ./import-base-images.sh"
+lxc exec ${RIC_LXC_IMG} -- bash -c "docker image inspect e2term:latest >/dev/null 2>&1; if [[ ! $? -eq 0 ]]; then cd "${SCRIPT_PATH}"; ./import-base-images.sh; fi"
 lxc exec ${RIC_LXC_IMG} -- bash -c "cd "${SCRIPT_PATH}" && ./setup-ric.sh "${RIC_IF}
 lxc exec ${RIC_LXC_IMG} -- bash -c "docker image prune -f"
 

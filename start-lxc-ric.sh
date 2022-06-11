@@ -39,3 +39,5 @@ iptables -t nat -A PREROUTING -p sctp -i ${HOST_IF} --dport ${RIC_PORT} -j DNAT 
 echo "Starting RIC"
 lxc exec ${RIC_LXC_IMG} -- bash -c "cd /root/radio_code/ric_bronze/ric-repository && ./import-base-images.sh"
 lxc exec ${RIC_LXC_IMG} -- bash -c "cd /root/radio_code/ric_bronze/ric-repository && ./setup-ric.sh "${RIC_IF}
+lxc exec ${RIC_LXC_IMG} -- bash -c "docker image prune -f"
+

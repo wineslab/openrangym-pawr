@@ -12,14 +12,6 @@ SCRIPT_PATH="/root/radio_code/colosseum-near-rt-ric/setup-scripts"
 echo "Flushing NAT table"
 iptables -t nat -F
 
-#echo "Restarting LXD/LXC"
-#if [[ $(service --status-all 2>&1 | grep lxd | wc -l) == "0" ]]; then
-#  snap restart lxd
-#else
-#  service lxd restart
-#  service lxc restart
-#fi
-
 echo "Initializing LXC container"
 lxc init local:${RIC_LXC_IMG} ${RIC_LXC_IMG}
 
@@ -42,6 +34,18 @@ iptables -t nat -A PREROUTING -p sctp -i ${HOST_IF} --dport ${RIC_PORT} -j DNAT 
 echo "Starting RIC"
 # lxc exec ${RIC_LXC_IMG} -- bash -c "cd "${SCRIPT_PATH}" && ./import-base-images.sh"
 lxc exec ${RIC_LXC_IMG} -- bash -c "docker image inspect e2term:latest >/dev/null 2>&1; if [[ ! $? -eq 0 ]]; then cd "${SCRIPT_PATH}"; ./import-base-images.sh; fi"
+
+# sometimes internet connectivity in lxd container gets stuck.
+# Restart lxd service to try to prevent this
+echo "Restarting LXD"
+if [[ ! $(service --status-all 2>&1 | grep lxd | wc -l) -eq 0 ]]; then
+  service lxd restart
+elif [[ ! $(snap list 2>&1 | grep lxd | wc -l) -eq 0 ]]; then
+  snap restart lxd
+else
+  echo "Don't know how to restart LXD"
+fi
+
 lxc exec ${RIC_LXC_IMG} -- bash -c "cd "${SCRIPT_PATH}" && ./setup-ric.sh "${RIC_IF}
 lxc exec ${RIC_LXC_IMG} -- bash -c "docker image prune -f"
 

@@ -7,7 +7,6 @@ RIC_LXC_IMG=ric
 RIC_PORT=36422
 
 SCRIPT_PATH="/root/radio_code/colosseum-near-rt-ric/setup-scripts"
-#SCRIPT_PATH="/root/radio_code/ric_bronze/ric-repository"
 
 echo "Flushing NAT table"
 iptables -t nat -F

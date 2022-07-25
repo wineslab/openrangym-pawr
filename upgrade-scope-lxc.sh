@@ -1,5 +1,6 @@
 #!/bin/bash
 # This script takes the Colosseum DU-SCOPE Ubuntu 16.04 LXC image and ports it to an Ubuntu 18.04 LXC container
+#  Call it as upgrade-scope-lxc.sh
 
 echo "Moving LXC pool to temporary volume and creating base container"
 mkdir -p /mydata/var/lib/lxd/storage-pools/default/containers

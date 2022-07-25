@@ -1,7 +1,7 @@
 #!/bin/bash
-# This starts the SCOPE LXC container on POWDER or ORBiT testbeds
+# This starts the SCOPE LXC container on POWDER or COSMOS testbeds
 #  Call it as start-lxc-scope.sh testbed usrp_type [flash]
-#    testbed: powder, orbit, or arena
+#    testbed: powder, cosmos, or arena
 #    usrp_type: b210 or x310
 #    flash: flash USRP X310 if passed
 set -xeuo pipefail
@@ -11,7 +11,7 @@ DU_LXC_BASE_IMG=du-scope
 
 # testbed images
 DU_LXC_IMG_POWDER=du-scope-1804
-DU_LXC_IMG_ORBIT=${DU_LXC_BASE_IMG}
+DU_LXC_IMG_COSMOS=${DU_LXC_BASE_IMG}
 DU_LXC_IMG_ARENA=${DU_LXC_BASE_IMG}
 
 # testbed subnetwork for USRP X310
@@ -36,8 +36,8 @@ fi
 if [[ ${TESTBED} == "powder" ]]; then
   DU_LXC_IMG=${DU_LXC_IMG_POWDER}
   X310_NET=${X310_NET_POWDER}
-elif [[ ${TESTBED} == "orbit" ]]; then
-  DU_LXC_IMG=${DU_LXC_IMG_ORBIT}
+elif [[ ${TESTBED} == "cosmos" ]]; then
+  DU_LXC_IMG=${DU_LXC_IMG_COSMOS}
 elif [[ ${TESTBED} == "arena" ]]; then
   DU_LXC_IMG=${DU_LXC_IMG_ARENA}
   X310_NET=${X310_NET_ARENA}
@@ -92,7 +92,7 @@ if [[ ${USRP} == "x310" ]]; then
       echo "Flashing USRP device"
       lxc exec ${DU_LXC_IMG} -- bash -c "/usr/local/bin/uhd_image_loader --args=\"type=x300,addr=192.168.40.2,fpga=XG\""
     fi
-  elif [[ ${TESTBED}=="orbit" ]]; then
+  elif [[ ${TESTBED}=="cosmos" ]]; then
     echo "Setting speed of Ethernet interfaces"
     HOST_IF=$(route -e | grep default | awk -F ' ' '{print $8}' | xargs)
     ifconfig ${HOST_IF} mtu 9000

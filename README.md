@@ -1,4 +1,4 @@
-# colosseum-pawr
+# OpenRAN Gym PAWR
 
 Scripts to start OpenRAN Gym LXC containers on PAWR platforms (tested on POWDER, COSMOS, and Arena).
 First, LXC images need to be transferred from Colosseum to the platform of interest (e.g., through `scp` or `rsync`).
